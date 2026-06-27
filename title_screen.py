@@ -19,8 +19,9 @@ class TitleScreen:
         pygame.draw.rect(self.screen, (40, 120, 200), self.play_button_rect.inflate(24, 16))
         self.screen.blit(play_surface, self.play_button_rect)
 
-        about_font = pygame.font.SysFont(None, 28)
-        about_surface = about_font.render("About: Defend Earth from the alien fleet.", True, (80, 80, 80))
+        about_font = pygame.font.SysFont(None, 18)
+        about_surface = about_font.render("Credits: " \
+        "RationalZombie(Markdown&Prompt&idea); Gemini-3.5-flash(Markdown); MAI-Code-1-Flash(Programming)", True, (80, 80, 80))
         about_rect = about_surface.get_rect(center=(self.settings.screen_width // 2, 520))
         self.screen.blit(about_surface, about_rect)
 
