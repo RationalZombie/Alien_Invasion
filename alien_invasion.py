@@ -3,6 +3,7 @@ from settings import Settings
 from ship import Ship
 from bullet import Bullet
 from alien import Alien
+from title_screen import TitleScreen
 
 class AlienInvasion:
     def __init__(self):
@@ -13,6 +14,10 @@ class AlienInvasion:
         self.screen=pygame.display.set_mode((self.settings.screen_width,self.settings.screen_height))
         self.bullets = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
+        self.explosions = []
+        self.score = 0
+        self.playing = False
+        self.title_screen = TitleScreen(self.screen, self.settings)
         '''Fullscreen
         self.screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
         self.screen.screen_width = self.screen.gey_rect().width
@@ -61,6 +66,8 @@ class AlienInvasion:
         for event in pygame.event.get():
             if event.type==pygame.QUIT:
                 sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                self._check_mouse_events(event)
             elif event.type == pygame.KEYDOWN:
                 self._check_keydown_events(event)
             elif event.type==pygame.KEYUP:
@@ -75,6 +82,14 @@ class AlienInvasion:
             self._fire_bullet()
         elif event.key == pygame.K_q:
             sys.exit()
+        elif event.key == pygame.K_RETURN and not self.playing:
+            self._start_game()
+
+    def _check_mouse_events(self, event):
+        if not self.playing and event.button == 1:
+            mouse_pos = pygame.mouse.get_pos()
+            if self.title_screen.handle_click(mouse_pos):
+                self._start_game()
 
     def _check_keyup_events(self, event):
             if event.key == pygame.K_RIGHT:
@@ -85,12 +100,31 @@ class AlienInvasion:
     def _update_screen(self):
         #Redraw everytime passing through tha loop
         self.screen.fill(self.settings.bg_color)
-        for bullet in self.bullets.sprites():
-            bullet.draw_bullet()
-        self.ship.blitme()
-        self.aliens.draw(self.screen)
+        if not self.playing:
+            self._draw_title_screen()
+        else:
+            for bullet in self.bullets.sprites():
+                bullet.draw_bullet()
+            self.ship.blitme()
+            self.aliens.draw(self.screen)
+            self._draw_score()
         #make the most recent-drawn screen visible
         pygame.display.flip()
+
+    def _draw_title_screen(self):
+        self.title_screen.draw()
+
+    def _start_game(self):
+        self.playing = True
+        self.score = 0
+
+    def _draw_score(self):
+        font = pygame.font.SysFont(None, 36)
+        score_surface = font.render(f"Score: {self.score}", True, (20, 20, 20))
+        self.screen.blit(score_surface, (10, 10))
+
+    def _update_score(self, points):
+        self.score += points
 
     def _update_bullets(self):
         for bullet in self.bullets.copy():
@@ -98,6 +132,13 @@ class AlienInvasion:
                 self.bullets.remove(bullet)
         #print(f"Sprite number: {len(self.bullets)}")
         self.bullets.update()
+
+    def _check_bullet_alien_collisions(self):
+        collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
+        for bullet, aliens_hit in collisions.items():
+            for alien in aliens_hit:
+                self.explosions.append((alien.rect.center, 10))
+                self._update_score(self.settings.alien_points)
 
     def _update_aliens(self):
         if any(alien.check_edges() for alien in self.aliens.sprites()):
@@ -110,10 +151,12 @@ class AlienInvasion:
         '''Main game-start loop'''
         while True:
             self._check_events()
-            self.ship.update()
-            self._update_bullets()
-            self.aliens.update()
-            self._update_aliens()
+            if self.playing:
+                self.ship.update()
+                self._update_bullets()
+                self.aliens.update()
+                self._check_bullet_alien_collisions()
+                self._update_aliens()
             self._update_screen()
             self.clock.tick(60)#Framerate=60
 
