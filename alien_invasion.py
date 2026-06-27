@@ -28,13 +28,18 @@ class AlienInvasion:
         alien = Alien(self)
         alien_width, alien_height = alien.rect.size
 
-        current_x, current_y = alien_width, alien_height
-        while current_y < (self.settings.screen_height - 3 * alien_height):
-            while current_x < (self.settings.screen_width - 2 * alien_width):
-                self._create_alien(current_x, current_y)
-                current_x += 2 * alien_width
-            #After adding one row of Alien, reset x and increase y
-            current_x = alien_width
+        margin_x = self.settings.fleet_margin_x
+        margin_y = self.settings.fleet_margin_y
+        current_x = margin_x
+        current_y = margin_y
+        max_x = self.settings.screen_width - margin_x - alien_width
+
+        for row in range(self.settings.fleet_rows):
+            for column in range(self.settings.fleet_columns):
+                if current_x < max_x:
+                    self._create_alien(current_x, current_y)
+                    current_x += 2 * alien_width
+            current_x = margin_x
             current_y += 2 * alien_height
 
     def _create_alien(self, x_position, y_position):
@@ -93,6 +98,12 @@ class AlienInvasion:
                 self.bullets.remove(bullet)
         #print(f"Sprite number: {len(self.bullets)}")
         self.bullets.update()
+
+    def _update_aliens(self):
+        if any(alien.check_edges() for alien in self.aliens.sprites()):
+            self.settings.fleet_direction *= -1
+            for alien in self.aliens.sprites():
+                alien.rect.y += self.settings.fleet_drop_speed
         
 
     def run_game(self):
@@ -101,6 +112,8 @@ class AlienInvasion:
             self._check_events()
             self.ship.update()
             self._update_bullets()
+            self.aliens.update()
+            self._update_aliens()
             self._update_screen()
             self.clock.tick(60)#Framerate=60
 

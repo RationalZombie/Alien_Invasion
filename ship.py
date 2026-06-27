@@ -11,17 +11,19 @@ class Ship:
         base_dir = os.path.dirname(__file__)
         image_path = os.path.join(base_dir, 'images', 'ship.bmp')
         try:
-            self.image = pygame.image.load(image_path)
+            raw_image = pygame.image.load(image_path)
+            self.image = pygame.transform.scale(raw_image, (70, 70))
             self.rect = self.image.get_rect()
         except (pygame.error, FileNotFoundError) as e:
             print(f"Warning: unable to load image '{image_path}'. Using placeholder. Details: {e}")
-            default_width = 50
-            default_height = 50
+            default_width = 44
+            default_height = 44
             self.image = pygame.Surface((default_width, default_height))
             self.image.fill((255, 0, 0))
             self.rect = self.image.get_rect()
         #every new ship is put ta the bottom of the screen
         self.rect.midbottom=self.screen_rect.midbottom
+        self.rect.y -= 40
 
         #在飞船的属性x中存储一个浮点数
 
