@@ -73,6 +73,8 @@ class AlienInvasion:
                 sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 self._check_mouse_events(event)
+            elif event.type == pygame.MOUSEBUTTONUP:
+                self._check_mouse_up(event)
             elif event.type == pygame.KEYDOWN:
                 self._check_keydown_events(event)
             elif event.type==pygame.KEYUP:
@@ -94,16 +96,29 @@ class AlienInvasion:
         if not self.playing and event.button == 1:
             mouse_pos = pygame.mouse.get_pos()
             if self.game_state == "TITLE":
-                if self.title_screen.handle_click(mouse_pos):
-                    self._start_game()
+                self.title_screen.handle_mouse_down(mouse_pos)
             elif self.game_state == "GAME_OVER":
-                action = self.game_over_screen.handle_click(mouse_pos)
+                self.game_over_screen.handle_mouse_down(mouse_pos)
+            elif self.game_state == "YOU_WON":
+                self.you_won_screen.handle_mouse_down(mouse_pos)
+
+    def _check_mouse_up(self, event):
+        if not self.playing and event.button == 1:
+            mouse_pos = pygame.mouse.get_pos()
+            if self.game_state == "TITLE":
+                action = self.title_screen.handle_mouse_up(mouse_pos)
+                if action == "play":
+                    self._start_game()
+                elif action in ("low", "mid", "high"):
+                    self.settings.set_difficulty(action)
+            elif self.game_state == "GAME_OVER":
+                action = self.game_over_screen.handle_mouse_up(mouse_pos)
                 if action == "retry":
                     self._start_game()
                 elif action == "title":
                     self._go_to_title()
             elif self.game_state == "YOU_WON":
-                action = self.you_won_screen.handle_click(mouse_pos)
+                action = self.you_won_screen.handle_mouse_up(mouse_pos)
                 if action == "retry":
                     self._start_game()
                 elif action == "title":

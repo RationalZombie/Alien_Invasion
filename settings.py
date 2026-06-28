@@ -17,8 +17,24 @@ class Settings:
         self.fleet_direction = 1
         self.fleet_margin_x = 100
         self.fleet_margin_y = 120
-        self.fleet_rows = 4
-        self.fleet_columns = 6
 
         self.alien_points = 10
+        self.difficulty = "mid"
+        self.set_difficulty(self.difficulty)
+
+    def set_difficulty(self, level):
+        """Adjust grid counts depending on level selection."""
+        if level == "low":
+            self.fleet_rows = 2
+            self.fleet_columns = 4
+        elif level == "mid":
+            self.fleet_rows = 4
+            self.fleet_columns = 6
+        elif level == "high":
+            self.fleet_rows = 6
+            self.fleet_columns = 8
+        else:
+            raise ValueError(f"Unknown difficulty level: {level}")
+
+        self.difficulty = level
         self.max_possible_score = self.fleet_rows * self.fleet_columns * self.alien_points

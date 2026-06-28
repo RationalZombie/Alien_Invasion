@@ -31,7 +31,7 @@ class YouWonScreen:
         self.screen.blit(body_surface, body_rect)
 
         button_font = pygame.font.SysFont(None, 40)
-        retry_surface = button_font.render("Retry", True, (255, 255, 255))
+        retry_surface = button_font.render("Restart", True, (255, 255, 255))
         self.retry_button_rect = retry_surface.get_rect(
             center=(self.settings.screen_width // 2 - 120, 360)
         )
@@ -53,9 +53,23 @@ class YouWonScreen:
         )
         self.screen.blit(title_surface, self.title_button_rect)
 
-    def handle_click(self, mouse_pos):
+    def handle_mouse_down(self, mouse_pos):
         if self.retry_button_rect.collidepoint(mouse_pos):
-            return "retry"
-        if self.title_button_rect.collidepoint(mouse_pos):
-            return "title"
-        return None
+            self.pressed_button = "retry"
+        elif self.title_button_rect.collidepoint(mouse_pos):
+            self.pressed_button = "title"
+        else:
+            self.pressed_button = None
+
+    def handle_mouse_up(self, mouse_pos):
+        if not getattr(self, "pressed_button", None):
+            return None
+
+        action = None
+        if self.pressed_button == "retry" and self.retry_button_rect.collidepoint(mouse_pos):
+            action = "retry"
+        elif self.pressed_button == "title" and self.title_button_rect.collidepoint(mouse_pos):
+            action = "title"
+
+        self.pressed_button = None
+        return action
