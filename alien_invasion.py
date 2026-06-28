@@ -4,6 +4,8 @@ from ship import Ship
 from bullet import Bullet
 from alien import Alien
 from title_screen import TitleScreen
+from game_over_screen import GameOverScreen
+from you_won_screen import YouWonScreen
 
 class AlienInvasion:
     def __init__(self):
@@ -19,6 +21,8 @@ class AlienInvasion:
         self.playing = False
         self.game_state = "TITLE"
         self.title_screen = TitleScreen(self.screen, self.settings)
+        self.game_over_screen = GameOverScreen(self.screen, self.settings)
+        self.you_won_screen = YouWonScreen(self.screen, self.settings)
         '''Fullscreen
         self.screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
         self.screen.screen_width = self.screen.gey_rect().width
@@ -89,8 +93,21 @@ class AlienInvasion:
     def _check_mouse_events(self, event):
         if not self.playing and event.button == 1:
             mouse_pos = pygame.mouse.get_pos()
-            if self.title_screen.handle_click(mouse_pos):
-                self._start_game()
+            if self.game_state == "TITLE":
+                if self.title_screen.handle_click(mouse_pos):
+                    self._start_game()
+            elif self.game_state == "GAME_OVER":
+                action = self.game_over_screen.handle_click(mouse_pos)
+                if action == "retry":
+                    self._start_game()
+                elif action == "title":
+                    self._go_to_title()
+            elif self.game_state == "YOU_WON":
+                action = self.you_won_screen.handle_click(mouse_pos)
+                if action == "retry":
+                    self._start_game()
+                elif action == "title":
+                    self._go_to_title()
 
     def _check_keyup_events(self, event):
             if event.key == pygame.K_RIGHT:
@@ -102,7 +119,12 @@ class AlienInvasion:
         #Redraw everytime passing through tha loop
         self.screen.fill(self.settings.bg_color)
         if not self.playing:
-            self._draw_title_screen()
+            if self.game_state == "TITLE":
+                self._draw_title_screen()
+            elif self.game_state == "GAME_OVER":
+                self.game_over_screen.draw()
+            elif self.game_state == "YOU_WON":
+                self.you_won_screen.draw()
         else:
             for bullet in self.bullets.sprites():
                 bullet.draw_bullet()
@@ -117,7 +139,27 @@ class AlienInvasion:
 
     def _start_game(self):
         self.playing = True
+        self.game_state = None
         self.score = 0
+        self.bullets.empty()
+        self.aliens.empty()
+        self.settings.fleet_direction = 1
+        self._create_fleet()
+        self.ship.rect.midbottom = self.screen.get_rect().midbottom
+        self.ship.rect.y -= 40
+        self.ship.x = float(self.ship.rect.x)
+
+    def _go_to_title(self):
+        self.playing = False
+        self.game_state = "TITLE"
+        self.score = 0
+        self.bullets.empty()
+        self.aliens.empty()
+        self.settings.fleet_direction = 1
+        self._create_fleet()
+        self.ship.rect.midbottom = self.screen.get_rect().midbottom
+        self.ship.rect.y -= 40
+        self.ship.x = float(self.ship.rect.x)
 
     def _draw_score(self):
         font = pygame.font.SysFont(None, 36)
