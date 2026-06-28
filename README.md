@@ -1,2 +1,4 @@
 # Alien_Invasion
-This is a simple ailen invasion arcade game.
+A Pygame based, vibecoded Alien Invasion style arcade game.
+
+**Compability**: Windows and macOS
