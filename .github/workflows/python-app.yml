@@ -1,0 +1,62 @@
+name: Build and Package Alien Invasion
+
+on:
+  release:
+    types: [created] # 当你在 GitHub 上创建并发布一个新 Release 时触发
+
+jobs:
+  build:
+    name: Build for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        # 配置矩阵：同时在 Windows 和 macOS 最新系统下运行编译
+        os: [windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pygame pyinstaller
+
+      # --- WINDOWS 编译步骤 ---
+      - name: Build Windows Executable
+        if: matrix.os == 'windows-latest'
+        run: |
+          pyinstaller --onefile --noconsole --add-data "images;images" alien_invasion.py
+
+      # --- macOS 编译与压缩步骤 ---
+      - name: Build macOS Application
+        if: matrix.os == 'macos-latest'
+        run: |
+          # 在 Mac 下，--add-data 的路径分隔符是冒号 (:)
+          pyinstaller --onefile --noconsole --add-data "images:images" alien_invasion.py
+          
+          # 将生成的 macOS 应用压缩成 zip 包，方便用户下载解压使用
+          cd dist
+          zip -r alien_invasion_mac.zip alien_invasion.app alien_invasion
+          
+      # --- 统一上传资产到 Release ---
+      - name: Upload Release Asset (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/alien_invasion.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Release Asset (macOS)
+        if: matrix.os == 'macos-latest'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/alien_invasion_mac.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
