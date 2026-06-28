@@ -17,6 +17,7 @@ class AlienInvasion:
         self.explosions = []
         self.score = 0
         self.playing = False
+        self.game_state = "TITLE"
         self.title_screen = TitleScreen(self.screen, self.settings)
         '''Fullscreen
         self.screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
@@ -120,7 +121,8 @@ class AlienInvasion:
 
     def _draw_score(self):
         font = pygame.font.SysFont(None, 36)
-        score_surface = font.render(f"Score: {self.score}", True, (20, 20, 20))
+        score_str = f"Score: {self.score} / {self.settings.max_possible_score}"
+        score_surface = font.render(score_str, True, (20, 20, 20))
         self.screen.blit(score_surface, (10, 10))
 
     def _update_score(self, points):
@@ -145,7 +147,16 @@ class AlienInvasion:
             self.settings.fleet_direction *= -1
             for alien in self.aliens.sprites():
                 alien.rect.y += self.settings.fleet_drop_speed
-        
+
+        self.aliens.update()
+
+        if pygame.sprite.spritecollideany(self.ship, self.aliens) or any(alien.rect.bottom >= self.settings.screen_height for alien in self.aliens.sprites()):
+            self.playing = False
+            self.game_state = "GAME_OVER"
+
+        if not self.aliens:
+            self.playing = False
+            self.game_state = "YOU_WON"
 
     def run_game(self):
         '''Main game-start loop'''

@@ -21,3 +21,4 @@ class Settings:
         self.fleet_columns = 6
 
         self.alien_points = 10
+        self.max_possible_score = self.fleet_rows * self.fleet_columns * self.alien_points
