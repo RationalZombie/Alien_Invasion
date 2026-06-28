@@ -1,4 +1,4 @@
-import pygame, os, sys
+import pygame, os
 
 class Ship:
     def __init__(self, ai_game):
@@ -25,8 +25,7 @@ class Ship:
         self.rect.midbottom=self.screen_rect.midbottom
         self.rect.y -= 40
 
-        #在飞船的属性x中存储一个浮点数
-
+        #Store a floating point as the x coordinate of the ship
         self.x=float(self.rect.x)
 
         #'Moving' Flag (The ship is not moving at the beginning)
