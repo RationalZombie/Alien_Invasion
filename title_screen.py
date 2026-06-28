@@ -27,14 +27,19 @@ class TitleScreen:
             pressed=self.pressed_button == "play",
         )
 
-        about_font = pygame.font.SysFont(None, 18)
-        about_surface = about_font.render(
-            "Credits: RationalZombie(Markdown&Prompt&idea); Gemini-3.5-flash(Markdown); MAI-Code-1-Flash/Raptor mini(Programming)",
-            True,
-            (80, 80, 80),
-        )
-        about_rect = about_surface.get_rect(center=(self.settings.screen_width // 2, 560))
-        self.screen.blit(about_surface, about_rect)
+        about_font = pygame.font.SysFont(None, 20)
+        about_lines = [
+            "Credits:",
+            "Design & Prompt: RationalZombie",
+            "Markdown Review: Gemini-3.5-flash",
+            "Code & Integration: MAI-Code-1-Flash",
+            "AI Assistant: Raptor mini",
+        ]
+
+        for index, line in enumerate(about_lines):
+            about_surface = about_font.render(line, True, (80, 80, 80))
+            about_rect = about_surface.get_rect(center=(self.settings.screen_width // 2, 540 + index * 24))
+            self.screen.blit(about_surface, about_rect)
 
     def _draw_difficulty_options(self):
         button_font = pygame.font.SysFont(None, 36)
